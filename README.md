@@ -2,6 +2,8 @@
 
 Scripts to run with `uv run`.
 
+- [`install_windsurf`](#install_windsurf)
+
 ## `install_windsurf`
 
 Installs the [Windsurf editor](https://codeium.com/windsurf) from Codium to `$HOME/.local/share`. This script provides a convenient way to install Windsurf on Linux systems without using the deb package or manually extracting the tarball.
