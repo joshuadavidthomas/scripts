@@ -92,7 +92,6 @@ def get_current_version() -> str:
 
     return data.get("windsurfVersion", "unknown")
 
-# Reuse functions from the installation script
 {get_latest_version_info.__name__} = {inspect.getsource(get_latest_version_info)}
 
 {download_file.__name__} = {inspect.getsource(download_file)}
