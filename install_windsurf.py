@@ -92,14 +92,39 @@ def get_current_version() -> str:
 
     return data.get("windsurfVersion", "unknown")
 
-# Get the source code of the functions
-get_latest_version_info_source = inspect.getsource(get_latest_version_info)
-download_file_source = inspect.getsource(download_file)
+# Include the functions directly
+def get_latest_version_info() -> dict[str, Any]:
+    """Get information about the latest version from the API."""
+    try:
+        with httpx.Client() as client:
+            response = client.get(API_URL)
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPError as e:
+        console.print(f"[red]Error connecting to update server: {e}[/red]")
+        sys.exit(1)
 
-# Write the functions properly
-{get_latest_version_info_source}
 
-{download_file_source}
+def download_file(url: str, target_path: Path) -> None:
+    """Download a file with progress bar."""
+    try:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            task = progress.add_task("Downloading Windsurf...", total=None)
+
+            with httpx.stream("GET", url) as response:
+                response.raise_for_status()
+                with target_path.open("wb") as f:
+                    for chunk in response.iter_bytes():
+                        f.write(chunk)
+
+            progress.update(task, completed=True)
+    except httpx.HTTPError as e:
+        console.print(f"[red]Error downloading file: {e}[/red]")
+        sys.exit(1)
 
 def update_windsurf() -> None:
     \"\"\"Update Windsurf to the latest version.\"\"\"
