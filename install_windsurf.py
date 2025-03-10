@@ -20,6 +20,7 @@ import shutil
 import json
 import tempfile
 import subprocess
+import inspect
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +45,7 @@ def create_update_script() -> str:
     update_script_path = BIN_DIR / "update-windsurf"
 
     with update_script_path.open("w") as f:
-        f.write("""#!/usr/bin/env -S uv run --script
+        f.write(f"""#!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
@@ -91,37 +92,10 @@ def get_current_version() -> str:
 
     return data.get("windsurfVersion", "unknown")
 
-def get_latest_version_info() -> dict[str, Any]:
-    \"\"\"Get information about the latest version from the API.\"\"\"
-    try:
-        with httpx.Client() as client:
-            response = client.get(API_URL)
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPError as e:
-        console.print(f"[red]Error connecting to update server: {e}[/red]")
-        sys.exit(1)
+# Reuse functions from the installation script
+{get_latest_version_info.__name__} = {inspect.getsource(get_latest_version_info)}
 
-def download_file(url: str, target_path: Path) -> None:
-    \"\"\"Download a file with progress bar.\"\"\"
-    try:
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            transient=True,
-        ) as progress:
-            task = progress.add_task(f"Downloading Windsurf...", total=None)
-
-            with httpx.stream("GET", url) as response:
-                response.raise_for_status()
-                with target_path.open("wb") as f:
-                    for chunk in response.iter_bytes():
-                        f.write(chunk)
-
-            progress.update(task, completed=True)
-    except httpx.HTTPError as e:
-        console.print(f"[red]Error downloading file: {e}[/red]")
-        sys.exit(1)
+{download_file.__name__} = {inspect.getsource(download_file)}
 
 def update_windsurf() -> None:
     \"\"\"Update Windsurf to the latest version.\"\"\"
@@ -134,7 +108,7 @@ def update_windsurf() -> None:
 
     # Get current version
     current_version = get_current_version()
-    console.print(f"Current version: [green]{current_version}[/green]")
+    console.print(f"Current version: [green]{{current_version}}[/green]")
 
     # Get latest version information
     console.print("Checking for updates...")
@@ -142,7 +116,7 @@ def update_windsurf() -> None:
     remote_version = version_info.get("windsurfVersion", "unknown")
     download_url = version_info.get("url")
 
-    console.print(f"Latest version: [green]{remote_version}[/green]")
+    console.print(f"Latest version: [green]{{remote_version}}[/green]")
 
     # Check if update is needed
     if current_version == remote_version:
@@ -185,7 +159,7 @@ def update_windsurf() -> None:
                 shutil.copy2(str(item), str(INSTALL_DIR / item.name))
 
     console.print(f"[bold green]✅ Update complete![/bold green]")
-    console.print(f"Windsurf updated from {current_version} to {remote_version}")
+    console.print(f"Windsurf updated from {{current_version}} to {{remote_version}}")
 
 if __name__ == "__main__":
     update_windsurf()
