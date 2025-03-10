@@ -45,6 +45,7 @@ def create_update_script() -> str:
     update_script_path = BIN_DIR / "update-windsurf"
 
     with update_script_path.open("w") as f:
+        # Write the script header
         f.write("""#!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
@@ -53,12 +54,17 @@ def create_update_script() -> str:
 #     "rich",
 # ]
 # ///
-\"\"\"
+""")
+        
+        # Write the docstring
+        f.write('''"""
 Windsurf Update Script
 
 This script updates the Windsurf editor to the latest version.
-\"\"\"
-
+"""
+''')
+        # Write imports
+        f.write('''
 import os
 import sys
 import shutil
@@ -78,9 +84,11 @@ console = Console()
 HOME_DIR = Path.home()
 INSTALL_DIR = HOME_DIR / ".local/share/windsurf"
 API_URL = "https://windsurf-stable.codeium.com/api/update/linux-x64/stable/latest"
-
+''')
+        # Write functions
+        f.write('''
 def get_current_version() -> str:
-    \"\"\"Get the current installed version of Windsurf.\"\"\"
+    """Get the current installed version of Windsurf."""
     product_json = INSTALL_DIR / "resources/app/product.json"
 
     if not product_json.exists():
@@ -125,9 +133,11 @@ def download_file(url: str, target_path: Path) -> None:
     except httpx.HTTPError as e:
         console.print(f"[red]Error downloading file: {e}[/red]")
         sys.exit(1)
-
+''')
+        # Write main update function and entry point
+        f.write('''
 def update_windsurf() -> None:
-    \"\"\"Update Windsurf to the latest version.\"\"\"
+    """Update Windsurf to the latest version."""
     console.print("[bold]Windsurf Update[/bold]")
 
     # Check if Windsurf is installed
@@ -137,7 +147,7 @@ def update_windsurf() -> None:
 
     # Get current version
     current_version = get_current_version()
-    console.print(f"Current version: [green]{{current_version}}[/green]")
+    console.print(f"Current version: [green]{current_version}[/green]")
 
     # Get latest version information
     console.print("Checking for updates...")
@@ -145,7 +155,7 @@ def update_windsurf() -> None:
     remote_version = version_info.get("windsurfVersion", "unknown")
     download_url = version_info.get("url")
 
-    console.print(f"Latest version: [green]{{remote_version}}[/green]")
+    console.print(f"Latest version: [green]{remote_version}[/green]")
 
     # Check if update is needed
     if current_version == remote_version:
@@ -192,11 +202,11 @@ def update_windsurf() -> None:
                 shutil.copy2(str(item), str(INSTALL_DIR / item.name))
 
     console.print(f"[bold green]✅ Update complete![/bold green]")
-    console.print(f"Windsurf updated from {{current_version}} to {{remote_version}}")
+    console.print(f"Windsurf updated from {current_version} to {remote_version}")
 
 if __name__ == "__main__":
     update_windsurf()
-""")
+''')
 
     # Make the update script executable
     update_script_path.chmod(0o755)
