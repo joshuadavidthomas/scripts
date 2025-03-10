@@ -146,14 +146,18 @@ def update_windsurf() -> None:
 
         # Install new version
         console.print("Installing...")
+        
+        # Clear the installation directory if it exists
+        if INSTALL_DIR.exists():
+            shutil.rmtree(str(INSTALL_DIR))
+        
+        # Create the installation directory
         INSTALL_DIR.mkdir(parents=True, exist_ok=True)
 
         # Copy files from extracted directory to installation directory
         for item in extract_path.iterdir():
             if item.is_dir():
-                shutil.copytree(
-                    str(item), str(INSTALL_DIR / item.name), dirs_exist_ok=True
-                )
+                shutil.copytree(str(item), str(INSTALL_DIR / item.name))
             else:
                 shutil.copy2(str(item), str(INSTALL_DIR / item.name))
 
@@ -339,14 +343,18 @@ def install(
 
         # Install new version
         console.print("Installing...")
+        
+        # Clear the installation directory if it exists
+        if INSTALL_DIR.exists():
+            shutil.rmtree(str(INSTALL_DIR))
+        
+        # Create the installation directory
         INSTALL_DIR.mkdir(parents=True, exist_ok=True)
 
         # Copy files from extracted directory to installation directory
         for item in extract_path.iterdir():
             if item.is_dir():
-                shutil.copytree(
-                    str(item), str(INSTALL_DIR / item.name), dirs_exist_ok=True
-                )
+                shutil.copytree(str(item), str(INSTALL_DIR / item.name))
             else:
                 shutil.copy2(str(item), str(INSTALL_DIR / item.name))
 
