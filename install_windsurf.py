@@ -45,7 +45,7 @@ def create_update_script() -> str:
     update_script_path = BIN_DIR / "update-windsurf"
 
     with update_script_path.open("w") as f:
-        f.write(f"""#!/usr/bin/env -S uv run --script
+        f.write("""#!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
