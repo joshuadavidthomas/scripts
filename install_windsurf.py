@@ -92,9 +92,14 @@ def get_current_version() -> str:
 
     return data.get("windsurfVersion", "unknown")
 
-{get_latest_version_info.__name__} = {inspect.getsource(get_latest_version_info)}
+# Get the source code of the functions
+get_latest_version_info_source = inspect.getsource(get_latest_version_info)
+download_file_source = inspect.getsource(download_file)
 
-{download_file.__name__} = {inspect.getsource(download_file)}
+# Write the functions properly
+{get_latest_version_info_source}
+
+{download_file_source}
 
 def update_windsurf() -> None:
     \"\"\"Update Windsurf to the latest version.\"\"\"
