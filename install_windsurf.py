@@ -14,20 +14,24 @@ This script installs the Windsurf editor to your home directory and sets up
 automatic updates via systemd.
 """
 
-import os
-import sys
-import shutil
-import json
-import tempfile
-import subprocess
+from __future__ import annotations
+
 import inspect
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
 import httpx
 import typer
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.progress import Progress
+from rich.progress import SpinnerColumn
+from rich.progress import TextColumn
 
 console = Console()
 app = typer.Typer(help="Install and manage Windsurf editor")
@@ -73,7 +77,9 @@ from typing import Any
 
 import httpx
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.progress import Progress
+from rich.progress import SpinnerColumn
+from rich.progress import TextColumn
 
 console = Console()
 
