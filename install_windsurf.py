@@ -44,13 +44,11 @@ def create_update_script() -> str:
     """Create the update script."""
     update_script_path = BIN_DIR / "update-windsurf"
 
-    # Get the source code of the functions we want to reuse
     get_latest_version_info_source = inspect.getsource(get_latest_version_info)
     download_file_source = inspect.getsource(download_file)
 
     with update_script_path.open("w") as f:
-        # Write the script header
-        f.write("""#!/usr/bin/env -S uv run --script
+        f.write(f'''#!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
@@ -58,17 +56,12 @@ def create_update_script() -> str:
 #     "rich",
 # ]
 # ///
-""")
-        
-        # Write the docstring
-        f.write('''"""
+"""
 Windsurf Update Script
 
 This script updates the Windsurf editor to the latest version.
 """
-''')
-        # Write imports
-        f.write('''
+
 import os
 import sys
 import shutil
@@ -88,9 +81,8 @@ console = Console()
 HOME_DIR = Path.home()
 INSTALL_DIR = HOME_DIR / ".local/share/windsurf"
 API_URL = "https://windsurf-stable.codeium.com/api/update/linux-x64/stable/latest"
-''')
-        # Write functions
-        f.write('''
+
+
 def get_current_version() -> str:
     """Get the current installed version of Windsurf."""
     product_json = INSTALL_DIR / "resources/app/product.json"
@@ -104,14 +96,13 @@ def get_current_version() -> str:
 
     return data.get("windsurfVersion", "unknown")
 
-# Reuse functions from the installation script
-''')
-        # Add the reused functions using their source code
-        f.write(get_latest_version_info_source)
-        f.write("\n\n")
-        f.write(download_file_source)
-        # Write main update function and entry point
-        f.write('''
+
+{get_latest_version_info_source}
+
+
+{download_file_source}
+
+
 def update_windsurf() -> None:
     """Update Windsurf to the latest version."""
     console.print("[bold]Windsurf Update[/bold]")
@@ -123,7 +114,7 @@ def update_windsurf() -> None:
 
     # Get current version
     current_version = get_current_version()
-    console.print(f"Current version: [green]{current_version}[/green]")
+    console.print(f"Current version: [green]{{current_version}}[/green]")
 
     # Get latest version information
     console.print("Checking for updates...")
@@ -131,7 +122,7 @@ def update_windsurf() -> None:
     remote_version = version_info.get("windsurfVersion", "unknown")
     download_url = version_info.get("url")
 
-    console.print(f"Latest version: [green]{remote_version}[/green]")
+    console.print(f"Latest version: [green]{{remote_version}}[/green]")
 
     # Check if update is needed
     if current_version == remote_version:
@@ -162,11 +153,11 @@ def update_windsurf() -> None:
 
         # Install new version
         console.print("Installing...")
-        
+
         # Clear the installation directory if it exists
         if INSTALL_DIR.exists():
             shutil.rmtree(str(INSTALL_DIR))
-        
+
         # Create the installation directory
         INSTALL_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -178,13 +169,12 @@ def update_windsurf() -> None:
                 shutil.copy2(str(item), str(INSTALL_DIR / item.name))
 
     console.print(f"[bold green]✅ Update complete![/bold green]")
-    console.print(f"Windsurf updated from {current_version} to {remote_version}")
+    console.print(f"Windsurf updated from {{current_version}} to {{remote_version}}")
 
 if __name__ == "__main__":
     update_windsurf()
 ''')
 
-    # Make the update script executable
     update_script_path.chmod(0o755)
     return str(update_script_path)
 
@@ -359,11 +349,11 @@ def install(
 
         # Install new version
         console.print("Installing...")
-        
+
         # Clear the installation directory if it exists
         if INSTALL_DIR.exists():
             shutil.rmtree(str(INSTALL_DIR))
-        
+
         # Create the installation directory
         INSTALL_DIR.mkdir(parents=True, exist_ok=True)
 
