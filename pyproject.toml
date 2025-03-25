@@ -1,0 +1,6 @@
+[tool.basedpyright]
+exclude = ["**/__pycache__"]
+include = ["*.py"]
+reportAny = false
+reportExplicitAny = false
+reportUnusedCallResult = false
