@@ -16,6 +16,13 @@ reportAny = false
 reportExplicitAny = false
 reportUnusedCallResult = false
 
+[[tool.basedpyright.executionEnvironments]]
+extraPaths = [
+  "/home/josh/.cache/uv/environments-v2/git-bare-clone-4872a125400f8114/lib/python3.13/site-packages/",
+  "/home/josh/.cache/uv/environments-v2/install-windsurf-393f242f2b065c45/lib/python3.13/site-packages/",
+]
+root = "."
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
