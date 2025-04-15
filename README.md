@@ -53,12 +53,32 @@ Using a bare repository with worktrees offers several advantages:
 - Easier management of multiple branches or features simultaneously.
 - Avoids conflicts between the main working directory and worktrees.
 
+### Installation
+
+To install the script as a git subcommand (`git bare-clone`), run the following command. This will download the script and place it in `~/.local/bin`. Ensure `~/.local/bin` is in your `PATH`.
+
+```bash
+uv run https://scripts.joshthomas.dev/git_bare_clone.py install
+```
+
 ### Usage Options
+
+**After Installation:**
+
+```bash
+# Basic usage (clones to .bare directory in current folder)
+git bare-clone <repository-url>
+
+# Clone to a custom directory relative to current folder
+git bare-clone <repository-url> --location <custom-dir>
+```
+
+**Direct Execution (without installation):**
 
 ```bash
 # Basic usage (clones to .bare directory)
-uv run https://scripts.joshthomas.dev/git_bare_clone.py <repository-url>
+uv run https://scripts.joshthomas.dev/git_bare_clone.py clone <repository-url>
 
 # Clone to a custom directory
-uv run https://scripts.joshthomas.dev/git_bare_clone.py <repository-url> --location <custom-dir>
+uv run https://scripts.joshthomas.dev/git_bare_clone.py clone <repository-url> --location <custom-dir>
 ```
