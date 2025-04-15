@@ -198,7 +198,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart={BIN_DIR}/update-windsurf
+ExecStart={sys.executable} {__file__} update
 StandardOutput=journal
 
 [Install]
@@ -387,10 +387,6 @@ def install(
     # Create desktop entry
     create_desktop_entry()
 
-    # Create update script
-    update_script = create_update_script()
-    console.print(f"[green]Update script created at {update_script}[/green]")
-
     # Set up systemd service
     if not skip_systemd:
         create_systemd_service()
@@ -481,15 +477,10 @@ def uninstall(
 
     # Remove launcher script
     launcher_path = BIN_DIR / "windsurf"
-    update_script_path = BIN_DIR / "update-windsurf"
 
     if launcher_path.exists():
         launcher_path.unlink()
         console.print("[green]Launcher script removed.[/green]")
-
-    if update_script_path.exists():
-        update_script_path.unlink()
-        console.print("[green]Update script removed.[/green]")
 
     # Remove desktop entry
     desktop_path = DESKTOP_DIR / "windsurf.desktop"
