@@ -42,3 +42,22 @@ uv run https://scripts.joshthomas.dev/install_windsurf.py uninstall
 # Uninstall but keep configuration files
 uv run https://scripts.joshthomas.dev/install_windsurf.py uninstall --keep-config
 ```
+
+## `git_bare_clone`
+
+Clones a git repository as a bare repository, setting it up for a workflow centered around git worktrees. This approach keeps the main repository directory clean, containing only the git metadata, while your working files reside in separate worktrees. This script is adapted from [@nicknisi's git-bare-clone script](https://github.com/nicknisi/dotfiles/blob/662ec5c2bcd4a5fdfb4305d99e70af8f301f1983/bin/git-bare-clone).
+
+Using a bare repository with worktrees offers several advantages:
+ - Cleaner project root directory.
+ - Easier management of multiple branches or features simultaneously.
+ - Avoids conflicts between the main working directory and worktrees.
+
+### Usage Options
+
+```bash
+# Basic usage (clones to .bare directory)
+uv run https://scripts.joshthomas.dev/git_bare_clone.py <repository-url>
+
+# Clone to a custom directory
+uv run https://scripts.joshthomas.dev/git_bare_clone.py <repository-url> --location <custom-dir>
+```
