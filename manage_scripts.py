@@ -24,27 +24,26 @@ console = Console()
 BIN_DIR = Path.home() / ".local/bin"
 BASE_URL = "https://scripts.joshthomas.dev"
 
-# Maps the desired command name (key) to the actual script filename (value)
-SCRIPT_NAME_MAP = {
-    "git-bare-clone": "git_bare_clone.py",
-    "install-windsurf": "install_windsurf.py",
-    # Add future scripts here, e.g.:
-    # "my-other-script": "my_other_script.py",
-}
+AVAILABLE_SCRIPTS = [
+    "git-bare-clone",
+    "install-windsurf",
+    # Add future command names here
+]
 
 
 def _install_single_script(script_name: str) -> bool:
     """Installs a single script and returns True on success, False on failure."""
     console.print(f"\nAttempting to install '{script_name}'...", style="yellow")
 
-    if script_name not in SCRIPT_NAME_MAP:
+    if script_name not in AVAILABLE_SCRIPTS:
         console.print(
             f"Error: Unknown script name '{script_name}'. Skipping.", style="red"
         )
-        console.print("Available scripts:", list(SCRIPT_NAME_MAP.keys()))
+        console.print("Available scripts:", AVAILABLE_SCRIPTS)
         return False
 
-    filename = SCRIPT_NAME_MAP[script_name]
+    # Derive filename: replace '-' with '_' and add '.py'
+    filename = script_name.replace("-", "_") + ".py"
     script_url = f"{BASE_URL}/{filename}"
     target_path = BIN_DIR / script_name
 
@@ -111,7 +110,7 @@ def install(
     latest version of the script directly from the web.
     """
     selected_scripts: list[str] = []
-    available_scripts = list(SCRIPT_NAME_MAP.keys())
+    available_scripts = AVAILABLE_SCRIPTS # Use the new list directly
 
     if not script_names:
         # No arguments provided, show interactive prompt
