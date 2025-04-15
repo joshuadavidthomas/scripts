@@ -1,6 +1,6 @@
 [dependency-groups]
 dev = [
-    "ruff>=0.11.2",
+  "ruff>=0.11.2",
 ]
 
 [project]
@@ -20,6 +20,7 @@ reportUnusedCallResult = false
 extraPaths = [
   "/home/josh/.cache/uv/environments-v2/git-bare-clone-4872a125400f8114/lib/python3.13/site-packages/",
   "/home/josh/.cache/uv/environments-v2/install-windsurf-393f242f2b065c45/lib/python3.13/site-packages/",
+  "/home/josh/.cache/uv/environments-v2/manage-scripts-350d5ed94cf28c16/lib/python3.13/site-packages/"
 ]
 root = "."
 
