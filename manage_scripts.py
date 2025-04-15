@@ -16,19 +16,16 @@ import typer
 from rich.console import Console
 from rich.prompt import Prompt
 
-app = typer.Typer(
-    help="Manage scripts from scripts.joshthomas.dev"
-)
-console = Console()
-
-BIN_DIR = Path.home() / ".local/bin"
-BASE_URL = "https://scripts.joshthomas.dev"
-
 AVAILABLE_SCRIPTS = [
     "git-bare-clone",
     "install-windsurf",
-    # Add future command names here
+    "manage-scripts",
 ]
+BIN_DIR = Path.home() / ".local" / "bin"
+SCRIPTS_DOMAIN = "scripts.joshthomas.dev"
+
+app = typer.Typer(help=f"Manage scripts from {SCRIPTS_DOMAIN}")
+console = Console()
 
 
 def _install_single_script(script_name: str) -> bool:
@@ -42,9 +39,8 @@ def _install_single_script(script_name: str) -> bool:
         console.print("Available scripts:", AVAILABLE_SCRIPTS)
         return False
 
-    # Derive filename: replace '-' with '_' and add '.py'
     filename = script_name.replace("-", "_") + ".py"
-    script_url = f"{BASE_URL}/{filename}"
+    script_url = f"https://{SCRIPTS_DOMAIN}/{filename}"
     target_path = BIN_DIR / script_name
 
     console.print(f"  Target installation path: {target_path}", style="blue")
@@ -66,7 +62,6 @@ exec uv run --quiet {script_url} "$@"
             f.write(wrapper_content)
 
         console.print(f"  Making script executable at {target_path}...", style="blue")
-        # Set permissions to rwxr-xr-x (755)
         target_path.chmod(0o755)
 
         console.print(
@@ -84,7 +79,10 @@ exec uv run --quiet {script_url} "$@"
         if target_path.exists():
             try:
                 target_path.unlink()
-                console.print(f"  Cleaned up partially created file: {target_path}", style="yellow")
+                console.print(
+                    f"  Cleaned up partially created file: {target_path}",
+                    style="yellow",
+                )
             except Exception as cleanup_e:
                 console.print(f"  Error during cleanup: {cleanup_e}", style="red")
         return False
@@ -96,8 +94,7 @@ def install(
         list[str] | None,  # Allow None
         typer.Argument(
             help=(
-                "One or more script names to install (e.g., 'git-bare-clone')."
-                " If none are provided, an interactive prompt will be shown."
+                "One or more script names to install (e.g., 'git-bare-clone'). If none are provided, an interactive prompt will be shown."
             ),
             metavar="SCRIPT_NAME",
         ),
@@ -110,7 +107,6 @@ def install(
     latest version of the script directly from the web.
     """
     selected_scripts: list[str] = []
-    available_scripts = AVAILABLE_SCRIPTS # Use the new list directly
 
     if not script_names:
         # No arguments provided, show interactive prompt
@@ -118,7 +114,7 @@ def install(
             "\nAvailable scripts for installation:",
             style="yellow",
         )
-        for i, script in enumerate(available_scripts, 1):
+        for i, script in enumerate(AVAILABLE_SCRIPTS, 1):
             console.print(f"  [bold cyan]{i}[/]: {script}")
 
         while not selected_scripts:
@@ -127,12 +123,10 @@ def install(
             )
             try:
                 indices = [
-                    int(n.strip()) - 1
-                    for n in raw_selection.split(",")
-                    if n.strip()
+                    int(n.strip()) - 1 for n in raw_selection.split(",") if n.strip()
                 ]
                 valid_indices = [
-                    idx for idx in indices if 0 <= idx < len(available_scripts)
+                    idx for idx in indices if 0 <= idx < len(AVAILABLE_SCRIPTS)
                 ]
                 invalid_indices = [
                     idx + 1 for idx in indices if idx not in valid_indices
@@ -152,9 +146,7 @@ def install(
                     continue  # Ask again
 
                 # Get script names based on valid indices
-                potential_scripts = [
-                    available_scripts[idx] for idx in valid_indices
-                ]
+                potential_scripts = [AVAILABLE_SCRIPTS[idx] for idx in valid_indices]
                 # Remove duplicates while preserving order
                 selected_scripts = list(dict.fromkeys(potential_scripts))
 
@@ -165,7 +157,9 @@ def install(
                 )
                 # Loop will continue to ask again
 
-        if not selected_scripts: # Should not happen if loop exits correctly, but safety check
+        if (
+            not selected_scripts
+        ):  # Should not happen if loop exits correctly, but safety check
             console.print("No scripts selected. Exiting.", style="yellow")
             raise typer.Exit()
     else:
@@ -191,16 +185,14 @@ def install(
     console.print(f"Failed installations: {fail_count}", style="red")
 
     if success_count > 0:
-        console.print(
-            f"\nEnsure '{BIN_DIR}' is in your system's PATH.", style="cyan"
-        )
+        console.print(f"\nEnsure '{BIN_DIR}' is in your system's PATH.", style="cyan")
         console.print(
             "You can now run the installed script(s) using their names.",
             style="cyan",
         )
 
     if fail_count > 0:
-        sys.exit(1) # Exit with error code if any installation failed
+        sys.exit(1)  # Exit with error code if any installation failed
 
 
 if __name__ == "__main__":
