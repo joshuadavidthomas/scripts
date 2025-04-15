@@ -10,11 +10,11 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Annotated, List
+from typing import Annotated
 
 import typer
 from rich.console import Console
-from rich.prompt import Checkbox, Prompt
+from rich.prompt import Prompt
 
 app = typer.Typer(
     help="Manage scripts from scripts.joshthomas.dev"
@@ -94,7 +94,7 @@ exec uv run --quiet {script_url} "$@"
 @app.command()
 def install(
     script_names: Annotated[
-        List[str],
+        list[str] | None,  # Allow None
         typer.Argument(
             help=(
                 "One or more script names to install (e.g., 'git-bare-clone')."
@@ -110,26 +110,73 @@ def install(
     Creates small wrapper scripts that use 'uv run' to execute the
     latest version of the script directly from the web.
     """
-    selected_scripts: List[str] = []
+    selected_scripts: list[str] = []
     available_scripts = list(SCRIPT_NAME_MAP.keys())
 
     if not script_names:
         # No arguments provided, show interactive prompt
         console.print(
-            "No script names provided. Please select scripts to install:",
+            "\nAvailable scripts for installation:",
             style="yellow",
         )
-        selected_scripts = Checkbox.ask(
-            "Select scripts", choices=available_scripts
-        )
-        if not selected_scripts:
+        for i, script in enumerate(available_scripts, 1):
+            console.print(f"  [bold cyan]{i}[/]: {script}")
+
+        while not selected_scripts:
+            raw_selection = Prompt.ask(
+                "\nEnter the numbers of the scripts to install (comma-separated, e.g., 1,3)"
+            )
+            try:
+                indices = [
+                    int(n.strip()) - 1
+                    for n in raw_selection.split(",")
+                    if n.strip()
+                ]
+                valid_indices = [
+                    idx for idx in indices if 0 <= idx < len(available_scripts)
+                ]
+                invalid_indices = [
+                    idx + 1 for idx in indices if idx not in valid_indices
+                ]
+
+                if invalid_indices:
+                    console.print(
+                        f"Warning: Invalid numbers ignored: {invalid_indices}",
+                        style="yellow",
+                    )
+
+                if not valid_indices:
+                    console.print(
+                        "No valid script numbers entered. Please try again.",
+                        style="red",
+                    )
+                    continue  # Ask again
+
+                # Get script names based on valid indices
+                potential_scripts = [
+                    available_scripts[idx] for idx in valid_indices
+                ]
+                # Remove duplicates while preserving order
+                selected_scripts = list(dict.fromkeys(potential_scripts))
+
+            except ValueError:
+                console.print(
+                    "Invalid input. Please enter numbers separated by commas.",
+                    style="red",
+                )
+                # Loop will continue to ask again
+
+        if not selected_scripts: # Should not happen if loop exits correctly, but safety check
             console.print("No scripts selected. Exiting.", style="yellow")
             raise typer.Exit()
     else:
-        # Use arguments provided
-        selected_scripts = script_names
+        # Use arguments provided, remove duplicates
+        selected_scripts = list(dict.fromkeys(script_names))
 
-    console.print(f"\nSelected scripts for installation: {selected_scripts}", style="bold blue")
+    console.print(
+        f"\nSelected scripts for installation: {selected_scripts}",
+        style="bold blue",
+    )
 
     success_count = 0
     fail_count = 0
