@@ -271,6 +271,22 @@ exec {INSTALL_DIR}/windsurf "$@"
     console.print("[green]Launcher script created at ~/.local/bin/windsurf[/green]")
 
 
+def get_current_version() -> str | None:
+    """Get the current installed version of Windsurf, or None if not installed."""
+    product_json = INSTALL_DIR / "resources/app/product.json"
+
+    if not product_json.exists():
+        return None
+
+    try:
+        with product_json.open() as f:
+            data = json.load(f)
+        return data.get("windsurfVersion")
+    except (json.JSONDecodeError, OSError) as e:
+        console.print(f"[yellow]Warning: Could not read version file: {e}[/yellow]")
+        return None
+
+
 def get_latest_version_info() -> dict[str, Any]:
     """Get information about the latest version from the API."""
     try:
@@ -408,19 +424,26 @@ def install(
 @app.command()
 def version() -> None:
     """Display the current version of Windsurf if installed."""
-    if not INSTALL_DIR.exists():
+    current_version = get_current_version()
+    if current_version is None:
         console.print("[red]Error: Windsurf is not installed.[/red]")
         return
 
+    # Need to read the full product.json again for other versions
     product_json = INSTALL_DIR / "resources/app/product.json"
     if not product_json.exists():
-        console.print("[red]Error: Cannot find version information.[/red]")
+         # This case should be covered by get_current_version, but check again
+        console.print("[red]Error: Cannot find version information file.[/red]")
         return
 
-    with product_json.open() as f:
-        data = json.load(f)
+    try:
+        with product_json.open() as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        console.print(f"[red]Error reading version file: {e}[/red]")
+        return
 
-    windsurf_version = data.get("windsurfVersion", "unknown")
+    windsurf_version = data.get("windsurfVersion", "unknown") # Use value from file
     codeium_version = data.get("codeiumVersion", "unknown")
     vs_version = data.get("version", "unknown")
 
@@ -433,15 +456,39 @@ def version() -> None:
 @app.command()
 def update() -> None:
     """Update Windsurf to the latest version."""
-    update_script = BIN_DIR / "update-windsurf"
+    console.print("[bold]Windsurf Update[/bold]")
 
-    if not update_script.exists():
-        console.print(
-            "[red]Error: Update script not found. Please run the install command first.[/red]"
-        )
+    # Check if Windsurf is installed
+    current_version = get_current_version()
+    if current_version is None:
+        console.print("[red]Error: Windsurf installation not found.[/red]")
+        console.print("Please run the install command first.")
+        sys.exit(1)
+
+    console.print(f"Current version: [green]{current_version}[/green]")
+
+    # Get latest version information
+    console.print("Checking for updates...")
+    version_info = get_latest_version_info()
+    remote_version = version_info.get("windsurfVersion")
+
+    if not remote_version:
+        console.print("[red]Error: Could not determine latest version.[/red]")
+        sys.exit(1)
+
+    console.print(f"Latest version: [green]{remote_version}[/green]")
+
+    # Check if update is needed
+    if current_version == remote_version:
+        console.print("[green]Already running the latest version![/green]")
         return
 
-    subprocess.run([str(update_script)], check=True)
+    # Perform the update using the common function
+    console.print("Updating Windsurf...")
+    _perform_install_or_update(version_info)
+
+    console.print(f"[bold green]✅ Update complete![/bold green]")
+    console.print(f"Windsurf updated from {current_version} to {remote_version}")
 
 
 @app.command()
