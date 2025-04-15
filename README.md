@@ -3,6 +3,8 @@
 Scripts to run with `uv run`.
 
 - [`install_windsurf`](#install_windsurf)
+- [`git_bare_clone`](#git_bare_clone)
+- [`manage_scripts`](#manage_scripts)
 
 All scripts are licensed under the MIT license. See the [`LICENSE`](https://github.com/joshuadavidthomas/scripts/blob/main/LICENSE) file for more information.
 
@@ -56,9 +58,10 @@ Using a bare repository with worktrees offers several advantages:
 ### Installation
 
 To install the script as a git subcommand (`git bare-clone`), run the following command. This will download the script and place it in `~/.local/bin`. Ensure `~/.local/bin` is in your `PATH`.
-
+This uses the `manage_scripts` utility (see below).
 ```bash
-uv run https://scripts.joshthomas.dev/git_bare_clone.py install
+# Installs 'git_bare_clone.py' as the command 'git-bare-clone'
+uv run https://scripts.joshthomas.dev/manage_scripts.py install git-bare-clone
 ```
 
 ### Usage Options
@@ -81,4 +84,22 @@ uv run https://scripts.joshthomas.dev/git_bare_clone.py clone <repository-url>
 
 # Clone to a custom directory
 uv run https://scripts.joshthomas.dev/git_bare_clone.py clone <repository-url> --location <custom-dir>
+```
+
+## `manage_scripts`
+
+A utility script to install other scripts from this repository as executable commands in your local environment (`~/.local/bin` by default).
+
+Instead of downloading the script content itself, this installer creates a small shell wrapper. When you run the installed command (e.g., `git-bare-clone`), the wrapper uses `uv run` to execute the latest version of the script directly from `https://scripts.joshthomas.dev`. This ensures you're always using the most up-to-date version without needing manual updates.
+
+### Usage
+
+```bash
+# Install the 'git-bare-clone' script as the command 'git-bare-clone'
+uv run https://scripts.joshthomas.dev/manage_scripts.py install git-bare-clone
+
+# Install the 'install-windsurf' script as the command 'install-windsurf'
+uv run https://scripts.joshthomas.dev/manage_scripts.py install install-windsurf
+
+# (Ensure ~/.local/bin is in your PATH to use the installed commands)
 ```
