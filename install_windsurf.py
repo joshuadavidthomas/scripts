@@ -305,31 +305,12 @@ def download_file(url: str, target_path: Path) -> None:
         sys.exit(1)
 
 
-@app.command()
-def install(
-    skip_systemd: bool = typer.Option(
-        False, "--skip-systemd", help="Skip setting up systemd service"
-    ),
-    force: bool = typer.Option(
-        False, "--force", help="Force installation even if already installed"
-    ),
-) -> None:
-    """Install Windsurf editor and set up automatic updates."""
-    console.print("[bold]Windsurf Installation[/bold]")
-
-    # Check if Windsurf is already installed
-    if INSTALL_DIR.exists() and not force:
-        console.print("[yellow]Windsurf is already installed.[/yellow]")
-        console.print("Use --force to reinstall.")
-        return
-
-    # Get latest version information
-    console.print("Getting download information...")
-    version_info = get_latest_version_info()
-    version = version_info.get("windsurfVersion", "unknown")
+def _perform_install_or_update(version_info: dict[str, Any]) -> None:
+    """Download, extract, and install Windsurf from version info."""
     download_url = version_info.get("url")
-
-    console.print(f"Installing Windsurf version: [green]{version}[/green]")
+    if not download_url:
+        console.print("[red]Error: Could not get download URL from version info.[/red]")
+        sys.exit(1)
 
     # Create temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -369,6 +350,36 @@ def install(
                 shutil.copytree(str(item), str(INSTALL_DIR / item.name))
             else:
                 shutil.copy2(str(item), str(INSTALL_DIR / item.name))
+
+
+@app.command()
+def install(
+    skip_systemd: bool = typer.Option(
+        False, "--skip-systemd", help="Skip setting up systemd service"
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Force installation even if already installed"
+    ),
+) -> None:
+    """Install Windsurf editor and set up automatic updates."""
+    console.print("[bold]Windsurf Installation[/bold]")
+
+    # Check if Windsurf is already installed
+    if INSTALL_DIR.exists() and not force:
+        console.print("[yellow]Windsurf is already installed.[/yellow]")
+        console.print("Use --force to reinstall.")
+        return
+
+    # Get latest version information
+    console.print("Getting download information...")
+    version_info = get_latest_version_info()
+    version = version_info.get("windsurfVersion", "unknown")
+    download_url = version_info.get("url")
+
+    console.print(f"Installing Windsurf version: [green]{version}[/green]")
+
+    # Perform the actual installation using the common function
+    _perform_install_or_update(version_info)
 
     # Create launcher script
     create_launcher()
